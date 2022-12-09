@@ -1,0 +1,91 @@
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    
+    - uses: actions/checkout@v2
+    - name: Use Node.js 16.15
+      uses: actions/setup-node@v1
+      with:
+        node-version: 16.15
+        
+    - name: Create .npmrc
+      run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+      
+    - name: Npm version
+      run: npm -v
+      
+    - name: Install
+      run: npm install
+      
+    - name: Format
+      run: npm run format:verify
+      
+    - name: Lint
+      run: npm run lint
+      
+    - name: Unit tests
+      run: npm run test:unit:ci
+      
+    - name: Publish Junit Tests
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        junit_files: ./reports/TEST-unit.xml
+        
+    - name: Integration tests
+      run: npm run test:integration
+        
+    - name: Publish Integration Tests
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      id: integration-result
+      if: always()
+      with:
+        junit_files: ./reports/TEST-integration.xml
+        
+    - name: Code Coverage Report
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      with:
+        filename: /coverage/cobertura-coverage.xml
+        badge: true
+        fail_below_min: true
+        hide_branch_rate: false
+        hide_complexity: true
+        indicators: true
+        format: markdown
+        output: both
+        thresholds: '50'
+        
+    - name: Write to Job Summary
+      run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+     
+    - # "Error: the step 'SonarCloudPrepare@1' does not have a conversion path yet"
+      run: |
+        echo "Error: the step 'SonarCloudPrepare@1' does not have a conversion path yet"
+        #task: SonarCloudPrepare@1
+        #inputs:
+        #  sonarcloud: Sonarcloud
+        #  organization: fsa
+        #  scannermode: CLI
+        #  configmode: file
+    - # "Error: the step 'SonarCloudAnalyze@1' does not have a conversion path yet"
+      run: |
+        echo "Error: the step 'SonarCloudAnalyze@1' does not have a conversion path yet"
+        #task: SonarCloudAnalyze@1
+        
+    - name: Prune dev dependencies
+      run: npm prune --production
+      
+    - name: Remove reporting folders
+      run: rm -rf coverage reports
+    - # 'Note: This is a third party action and currently only supports Linux: https://github.com/marketplace/actions/create-zip-file'
+      uses: montudor/action-zip@v0.1.0
+      with:
+        args:  zip -qq -r vendor.zip . -i vendor
+
+    - name: Use the Upload Artifact GitHub Action
+      uses: actions/upload-artifact@v2
+      with: 
+        name: assets-for-download
+        path: downloads
