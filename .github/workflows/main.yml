@@ -41,7 +41,7 @@ jobs:
       run: npm run lint
       
     - name: Unit tests
-      run: npm run test:unit
+      run: npm run test:unit:ci
       
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action@v2
