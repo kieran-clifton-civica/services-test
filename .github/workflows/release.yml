@@ -1,0 +1,44 @@
+name: Release
+run-name: Release (${{ github.ref_name  }})
+on: 
+    workflow_dispatch:
+#     pull_request:
+#         branches:
+#         - 'release/**'
+#         - 'hotfix/**'
+jobs:
+  build_and_test:
+    name: Build & test
+    uses: ./.github/workflows/build_and_test.yml
+    
+  deploy_to_staging:
+    name: Deploy to Staging
+    needs: build_and_test
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: staging
+    secrets: inherit
+    
+ # e2e_ui_test:
+ #   name: E2E, UI Test
+ #   needs: deploy_to_staging
+ #   uses: ./.github/workflows/e2e_ui_test.yml
+ #   with:
+ #     environment: staging
+ #   secrets: inherit
+    
+  deploy_to_production:
+    name: Deploy to Production
+    needs: [build_and_test, deploy_to_staging]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: production
+    secrets: inherit
+    
+  deploy_to_onboarding:
+    name: Deploy to Onboarding
+    needs: [build_and_test, deploy_to_staging]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: onboarding
+    secrets: inherit
