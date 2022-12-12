@@ -18,29 +18,13 @@ jobs:
     with:
       environment: staging
     secrets: inherit
-  
-  deploy_to_staging_collections:
-    name: Deploy to Staging Collections
-    needs: build_and_test
-    uses: ./.github/workflows/deploy.yml
-    with:
-      environment: staging-collections
-    secrets: inherit
-    
+
   deploy_to_production:
     name: Deploy to Production
     needs: [build_and_test, deploy_to_staging]
     uses: ./.github/workflows/deploy.yml
     with:
       environment: production
-    secrets: inherit
-    
-  deploy_to_production_collections:
-    name: Deploy to Production Collections
-    needs: [build_and_test, deploy_to_staging]
-    uses: ./.github/workflows/deploy.yml
-    with:
-      environment: production-collections
     secrets: inherit
     
   deploy_to_onboarding:
@@ -51,11 +35,4 @@ jobs:
       environment: onboarding
     secrets: inherit
 
-  deploy_to_onboarding_collections:
-    name: Deploy to Onboarding Collections
-    needs: [build_and_test, deploy_to_staging]
-    uses: ./.github/workflows/deploy.yml
-    with:
-      environment: onboarding-collections
-    secrets: inherit
 
