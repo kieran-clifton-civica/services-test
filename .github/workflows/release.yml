@@ -18,6 +18,14 @@ jobs:
     with:
       environment: staging
     secrets: inherit
+  
+  deploy_to_staging_collections:
+    name: Deploy to Staging Collections
+    needs: build_and_test
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: staging-collections
+    secrets: inherit
     
  # e2e_ui_test:
  #   name: E2E, UI Test
@@ -35,10 +43,26 @@ jobs:
       environment: production
     secrets: inherit
     
+  deploy_to_production_collections:
+    name: Deploy to Production Collections
+    needs: [build_and_test, deploy_to_staging]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: production-collections
+    secrets: inherit
+    
   deploy_to_onboarding:
     name: Deploy to Onboarding
     needs: [build_and_test, deploy_to_staging]
     uses: ./.github/workflows/deploy.yml
     with:
       environment: onboarding
+    secrets: inherit
+
+  deploy_to_onboarding_collections:
+    name: Deploy to Onboarding Collections
+    needs: [build_and_test, deploy_to_staging]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: onboarding-collections
     secrets: inherit
